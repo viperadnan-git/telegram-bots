@@ -63,3 +63,33 @@ def dkick(client, message):
     sent_message = message.reply_text(Messages.CREATOR_REQUIRED)
     sleep(5)
     sent_message.delete()
+
+@Client.on_message(filters.incoming & ~filters.private & filters.command(['instatus']))
+def instatus(client, message):
+  user = client.get_chat_member(message.chat.id, message.from_user.id)
+  if user.status in ('administrator', 'creator'):
+    sent_message = message.reply_text(Messages.FETCHING_INFO)
+    recently = 0
+    within_week = 0
+    within_month = 0
+    long_time_ago = 0
+    deleted_acc = 0
+    uncached = 0
+    bot = 0
+    for member in client.iter_chat_members(message.chat.id):
+      user = member.user
+      if user.is_deleted:
+        deleted_acc += 1
+      elif user.is_bot:
+        bot += 1
+      elif user.status == "recently":
+        recently += 1
+      elif user.status == "within_week":
+        within_week += 1
+      elif user.status == "within_month":
+        within_month += 1
+      elif user.status == "long_time_ago":
+        long_time_ago += 1
+      else:
+        uncached += 1
+    sent_message.edit(Messages.STATUS.format(message.chat.title, recently, within_week, within_month, long_time_ago, deleted_acc, bot, uncached))
